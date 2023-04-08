@@ -59,16 +59,22 @@ def verifyPDF():
 @app.route("/uploadVerifyPDF", methods=['POST'])
 def uploadVerifyPDF():
 
+    PRN = request.form['PRN']
     newPdfName = request.form['newPdfName']
-
     filePDF = request.files['PdfFile']
     filepath = './user_uploads/' + newPdfName + '.pdf'
     filePDF.save(filepath)
 
-    extract_img_pdf(filepath)
+    key_pdf_state = keyCheck(filepath, PRN)
 
+    contains = extract_img_pdf(filepath, PRN)
 
-    return "hello"
+    if 'false' in contains:
+        details_pdf_state = 'false'
+    else:
+        details_pdf_state = details_img(filepath, PRN)
+
+    return key_pdf_state + " " + details_pdf_state
 
 
 if __name__ == "__main__":

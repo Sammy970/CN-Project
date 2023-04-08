@@ -33,49 +33,40 @@ def writingKey(filePath, nameOfFile, key):
     pdf.docinfo['/chaavi'] = key
     pdf.save('./security_docs/' + nameOfFile + '.pdf')
 
+
 # Inserting Object into database
-
-
 def insertKeyDB(key, prn):
     object = {"chaavi": key, "PRN": prn}
     collection.insert_one(object)
 
-# Retrieving chaavi (key) from the metadata of PDF
 
-
-def retrievingKey(filePath):
-    pdf = pikepdf.Pdf.open(filePath, allow_overwriting_input=True)
-    pdfMetadeta = pdf.docinfo
-    pdfChaavi = pdfMetadeta['/chaavi']
-    return pdfChaavi
-
-# Retrieving chaavi from database
-
-
-def retrievingKeyDB(PRN, collection):
-    result = collection.find_one({"PRN": PRN})
-    dbChaavi = result["chaavi"]
-    return dbChaavi
-
-# Comparison
-
-
-def compare(pdfChaavi, dbChaavi):
-    if (pdfChaavi == dbChaavi):
-        print('The PDF is genuine')
+# Key checking in pdf and DB
+def keyCheck(inputFilePath, PRN_num):
+    find = collection.find_one({'PRN': PRN_num})
+    example = pikepdf.open(inputFilePath)
+    docMetadeta = example.docinfo
+    try:
+        key_doc = docMetadeta['/chaavi']
+    except:
+        pdf_state = "false"
+        return pdf_state
     else:
-        print('The PDF is not genuine')
+        key_DB = find["chaavi"]
+        if (key_doc == key_DB):
+            pdf_state = "true"
+            return pdf_state
+        else:
+            pdf_state = "false"
+            return pdf_state
 
 
 # Adding Invisible Watermark Image to PDF Function
 def adding_image(inputFilePath, PRN):
 
     pdf_doc = fitz.open(inputFilePath)
-
+    total_pages = pdf_doc.page_count
     resize_img()
-
     image = fitz.Pixmap("./images/resized_img.png")
-
     height = image.height
     width = image.width
 
@@ -85,9 +76,7 @@ def adding_image(inputFilePath, PRN):
         num_pages = pdf_doc.page_count - 1
 
     num_array = num_of_pages(num_pages)
-
-    adding_to_db(num_array, PRN, height, width)
-
+    adding_to_db(num_array, PRN, height, width, total_pages)
     len_num_array = len(num_array)
 
     for i in range(len_num_array):
@@ -97,7 +86,6 @@ def adding_image(inputFilePath, PRN):
 
     pdf_doc.saveIncr()
     pdf_doc.close()
-
     return height, width, num_array
 
 
@@ -118,7 +106,7 @@ def num_of_pages(num_pages):
         return randomList
 
 
-def adding_to_db(num_array, PRN, height, width):
+def adding_to_db(num_array, PRN, height, width, total_pages):
 
     object_to_update = collection.find_one({"PRN": PRN})
 
@@ -130,6 +118,8 @@ def adding_to_db(num_array, PRN, height, width):
     if (object_to_update):
         collection.update_one({"PRN": PRN}, {'$set': {"pageNum": num_array}})
         collection.update_one({"PRN": PRN}, {'$set': {"size": size}})
+        collection.update_one(
+            {"PRN": PRN}, {'$set': {"total_pages": total_pages}})
 
         print('New key-value pair added successfully!')
     else:
@@ -138,27 +128,50 @@ def adding_to_db(num_array, PRN, height, width):
     return "hello"
 
 
-def extract_img_pdf(newFilePath):
+def extract_img_pdf(newFilePath, PRN_num):
     example = pikepdf.open(newFilePath)
-    page1 = example.pages[0]
-    variable = list(page1.images.keys())
-    if '/fzImg0' in variable:
-        contains = "true"
+    find = collection.find_one({"PRN": PRN_num})
+    contains = []
+
+    total_pages = len(example.pages)
+    total_pages_db = find['total_pages']
+
+    if (total_pages == total_pages_db):
+
+        pages_with_img = find['pageNum']
+        for x in pages_with_img:
+            page = example.pages[x]
+            variable = list(page.images.keys())
+            if '/fzImg0' in variable:
+                contains.append('true')
+            else:
+                contains.append('false')
+            return contains
     else:
-        contains = "false"
-    return variable, contains
+        contains.append('false')
+        return contains
 
 
-def details_img(inputFilePath, contains, variable):
-    if (contains == "true"):
-        example = pikepdf.open(inputFilePath)
-        page1 = example.pages[0]
-        pdfimage = page1.images['/fzImg0']
+def details_img(inputFilePath, PRN_num):
+    example = pikepdf.open(inputFilePath)
+    find = collection.find_one({"PRN": PRN_num})
+
+    pages_with_img = find['pageNum']
+
+    for x in pages_with_img:
+        page = example.pages[x]
+        pdfimage = page.images['/fzImg0']
         width = pdfimage.Width
         height = pdfimage.Height
-        return width, height
-    else:
-        return print("Nope")
+        db_width = find['size']['width']
+        db_height = find['size']['height']
+
+        if (width == db_width and height == db_height):
+            pdf_state = 'true'
+        else:
+            pdf_state = 'false'
+
+    return pdf_state
 
 
 def random_hei_wei():
