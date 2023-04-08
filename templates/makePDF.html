@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Making PDF</title>
+</head>
+
+<body>
+
+    <form action="/formData" , method="POST" enctype="multipart/form-data">
+        <label for="prn">PRN: </label>
+        <input type="text" id="PRN" name="PRN">
+
+        <br> <br>
+
+        <label for="key">Key: </label>
+        <input type="text" id="ley" name="key">
+
+        <br> <br>
+
+        <label for="PdfFile">File</label>
+        <input type="file" id="PdfFile" name="PdfFile">
+
+        <br><br>
+
+        <label for="newPdfName">PDF Name: </label>
+        <input type="text" id="newPdfName" name="newPdfName">
+
+        <br><br>
+        <button type="submit">Submit</button>
+    </form>
+
+</body>
+
+</html>
