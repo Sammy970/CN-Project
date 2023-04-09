@@ -3,6 +3,8 @@ from functions import *
 import pymongo
 
 app = Flask(__name__)
+# Set a secret key for session security, replace with your own key
+app.secret_key = 'Samyak_Jain'
 
 
 @app.route("/")
@@ -17,12 +19,11 @@ def makingPDF():
 
 @app.route("/formData", methods=['POST', 'GET'])
 def formData():
+
     PRN = request.form['PRN']
-    # PRN = int(PRN)
     keyLength = request.form['key']
-    # key = int(key)
     newPdfName = request.form['newPdfName']
-    # newPdfName = newPdfName + '.pdf'
+    session['name_of_file'] = newPdfName
     filePDF = request.files['PdfFile']
     filePDF.save('./uploads/' + newPdfName + '.pdf')
     return redirect(url_for('adding_security', data1=PRN, data2=keyLength, data3=newPdfName))
@@ -51,6 +52,18 @@ def adding_security():
     return render_template('security_data.html', keyData=key, heightData=height, widthData=width, numData=num_array)
 
 
+@app.route('/download', methods=['GET'])
+def download():
+    name_of_file = session.get('name_of_file')
+    name_of_file = name_of_file + '.pdf'
+    headers = {
+        'Content-Disposition': 'attachment; filename=' + '"' + name_of_file + '"',
+        'Content-Type': 'application/pdf',
+    }
+    filePath = './security_docs/' + name_of_file
+    return send_file(filePath, as_attachment=True, attachment_filename=name_of_file, mimetype='application/pdf')
+
+
 @app.route("/verifyPDF", methods=['POST', 'GET'])
 def verifyPDF():
     return render_template('verifyPDF.html')
@@ -67,14 +80,21 @@ def uploadVerifyPDF():
 
     key_pdf_state = keyCheck(filepath, PRN)
 
-    contains = extract_img_pdf(filepath, PRN)
+    contains_img, total_pages_state = extract_img_pdf(filepath, PRN)
 
-    if 'false' in contains:
+    if 'false' in contains_img:
         details_pdf_state = 'false'
+        contains_img = 'false'
     else:
         details_pdf_state = details_img(filepath, PRN)
 
-    return key_pdf_state + " " + details_pdf_state
+    # return key_pdf_state + " " + details_pdf_state
+    return render_template('verified_data.html',
+                           keyState=key_pdf_state,
+                           totalpages_state=total_pages_state,
+                           contains_img_state=contains_img,
+                           img_details_state=details_pdf_state
+                           )
 
 
 if __name__ == "__main__":

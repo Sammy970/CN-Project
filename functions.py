@@ -133,6 +133,8 @@ def extract_img_pdf(newFilePath, PRN_num):
     find = collection.find_one({"PRN": PRN_num})
     contains = []
 
+    total_pages_state = "true"
+
     total_pages = len(example.pages)
     total_pages_db = find['total_pages']
 
@@ -146,10 +148,11 @@ def extract_img_pdf(newFilePath, PRN_num):
                 contains.append('true')
             else:
                 contains.append('false')
-            return contains
+        return contains, total_pages_state
     else:
+        total_pages_state = "false"
         contains.append('false')
-        return contains
+        return contains, total_pages_state
 
 
 def details_img(inputFilePath, PRN_num):
