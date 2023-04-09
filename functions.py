@@ -131,7 +131,7 @@ def adding_to_db(num_array, PRN, height, width, total_pages):
 def extract_img_pdf(newFilePath, PRN_num):
     example = pikepdf.open(newFilePath)
     find = collection.find_one({"PRN": PRN_num})
-    contains = []
+    contains = ''
 
     total_pages_state = "true"
 
@@ -145,9 +145,9 @@ def extract_img_pdf(newFilePath, PRN_num):
             page = example.pages[x]
             variable = list(page.images.keys())
             if '/fzImg0' in variable:
-                contains.append('true')
+                contains = 'true'
             else:
-                contains.append('false')
+                contains = 'false'
         return contains, total_pages_state
     else:
         total_pages_state = "false"
