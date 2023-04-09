@@ -1,6 +1,7 @@
 from flask import *
 from functions import *
 import pymongo
+import os
 
 app = Flask(__name__)
 # Set a secret key for session security, replace with your own key
@@ -25,12 +26,21 @@ def formData():
     newPdfName = request.form['newPdfName']
     session['name_of_file'] = newPdfName
     filePDF = request.files['PdfFile']
+    path = './uploads'
+    isExist = os.path.exists(path)
+    if not isExist:
+        os.makedirs(path)
     filePDF.save('./uploads/' + newPdfName + '.pdf')
     return redirect(url_for('adding_security', data1=PRN, data2=keyLength, data3=newPdfName))
 
 
 @app.route("/adding_security", methods=['POST', 'GET'])
 def adding_security():
+
+    path = './security_docs'
+    isExist = os.path.exists(path)
+    if not isExist:
+        os.makedirs(path)
 
     PRN = request.args.get('data1')
     keyLength = request.args.get('data2')
@@ -71,6 +81,11 @@ def verifyPDF():
 
 @app.route("/uploadVerifyPDF", methods=['POST'])
 def uploadVerifyPDF():
+
+    path = './user_uploads'
+    isExist = os.path.exists(path)
+    if not isExist:
+        os.makedirs(path)
 
     PRN = request.form['PRN']
     newPdfName = request.form['newPdfName']
