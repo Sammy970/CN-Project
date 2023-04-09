@@ -15,6 +15,15 @@ def home():
 
 @app.route("/makePDF", methods=['POST', 'GET'])
 def makingPDF():
+    path = './uploads'
+    isExist = os.path.exists(path)
+    if not isExist:
+        os.makedirs(path)
+
+    path1 = './security_docs'
+    isExist = os.path.exists(path1)
+    if not isExist:
+        os.makedirs(path1)
     return render_template("makePDF.html")
 
 
@@ -26,21 +35,13 @@ def formData():
     newPdfName = request.form['newPdfName']
     session['name_of_file'] = newPdfName
     filePDF = request.files['PdfFile']
-    path = './uploads'
-    isExist = os.path.exists(path)
-    if not isExist:
-        os.makedirs(path)
+
     filePDF.save('./uploads/' + newPdfName + '.pdf')
     return redirect(url_for('adding_security', data1=PRN, data2=keyLength, data3=newPdfName))
 
 
-@app.route("/adding_security", methods=['POST', 'GET'])
+@app.route("/adding_security", methods=['POST'])
 def adding_security():
-
-    path = './security_docs'
-    isExist = os.path.exists(path)
-    if not isExist:
-        os.makedirs(path)
 
     PRN = request.args.get('data1')
     keyLength = request.args.get('data2')
@@ -76,16 +77,15 @@ def download():
 
 @app.route("/verifyPDF", methods=['POST', 'GET'])
 def verifyPDF():
+    path2 = './user_uploads'
+    isExist = os.path.exists(path2)
+    if not isExist:
+        os.makedirs(path2)
     return render_template('verifyPDF.html')
 
 
 @app.route("/uploadVerifyPDF", methods=['POST'])
 def uploadVerifyPDF():
-
-    path = './user_uploads'
-    isExist = os.path.exists(path)
-    if not isExist:
-        os.makedirs(path)
 
     PRN = request.form['PRN']
     newPdfName = request.form['newPdfName']
