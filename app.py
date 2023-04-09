@@ -72,7 +72,7 @@ def download():
         'Content-Type': 'application/pdf',
     }
     filePath = './security_docs/' + name_of_file
-    return send_file(filePath, as_attachment=True, attachment_filename=name_of_file, mimetype='application/pdf')
+    return send_file(filePath, as_attachment=True, mimetype='application/pdf')
 
 
 @app.route("/verifyPDF", methods=['POST', 'GET'])
