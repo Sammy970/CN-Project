@@ -40,7 +40,7 @@ def formData():
     return redirect(url_for('adding_security', data1=PRN, data2=keyLength, data3=newPdfName))
 
 
-@app.route("/adding_security", methods=['POST'])
+@app.route("/adding_security", methods=['POST', 'GET'])
 def adding_security():
 
     PRN = request.args.get('data1')
@@ -84,7 +84,7 @@ def verifyPDF():
     return render_template('verifyPDF.html')
 
 
-@app.route("/uploadVerifyPDF", methods=['POST'])
+@app.route("/uploadVerifyPDF", methods=['POST', 'GET'])
 def uploadVerifyPDF():
 
     PRN = request.form['PRN']
