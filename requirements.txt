@@ -2,3 +2,4 @@ Flask
 pikepdf
 PyMuPDF
 pymongo
+Gunicorn
