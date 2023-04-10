@@ -151,7 +151,7 @@ def extract_img_pdf(newFilePath, PRN_num):
         return contains, total_pages_state
     else:
         total_pages_state = "false"
-        contains.append('false')
+        contains = 'false'
         return contains, total_pages_state
 
 
